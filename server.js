@@ -8,6 +8,8 @@ app.use(express.json());
 // Rotas
 app.use("/auth", require("./routes/auth"));
 
-app.listen(3000, () => {
-  console.log("Servidor rodando na porta 3000");
+// Use porta do Render ou fallback 3000 local
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
