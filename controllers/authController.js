@@ -1,30 +1,49 @@
-const db = require('../database');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const db = require("../database");
+const jwt = require("jsonwebtoken");
 
 module.exports = {
-    login(req, res) {
-        const { email, senha } = req.body;
+  async login(req, res) {
+    try {
+      const { email, senha } = req.body;
 
-        db.query('SELECT * FROM usuarios WHERE email = ?', [email], (err, results) => {
-            if (err) {
-                console.error("ERRO NO MYSQL:", err);
-                return res.status(500).json({ error: 'Erro no servidor', details: err });
-            }
-            if (results.length === 0) return res.status(401).json({ error: 'Usuário não encontrado' });
+      if (!email || !senha) {
+        return res.status(400).json({ error: "Email e senha são obrigatórios" });
+      }
 
-            const user = results[0];
+      const result = await db.query(
+        "SELECT * FROM usuarios WHERE email = $1",
+        [email]
+      );
 
-            const senhaCorreta = senha === results[0].senha;
-            if (!senhaCorreta) return res.status(401).json({ error: 'Senha incorreta' });
+      if (result.rows.length === 0) {
+        return res.status(401).json({ error: "Usuário não encontrado" });
+      }
 
-            const token = jwt.sign(
-                { id: user.id, nome: user.nome, tipo: user.tipo },
-                'segredo123',
-                { expiresIn: '8h' }
-            );
+      const user = result.rows[0];
 
-            res.json({ message: 'Login realizado', token, user });
-        });
+      if (user.senha !== senha) {
+        return res.status(401).json({ error: "Senha incorreta" });
+      }
+
+      const token = jwt.sign(
+        {
+          id: user.id,
+          nome: user.nome,
+          tipo: user.tipo,
+          email: user.email,
+        },
+        "segredo123",
+        { expiresIn: "8h" }
+      );
+
+      res.json({
+        message: "Login realizado com sucesso",
+        token,
+        user,
+      });
+    } catch (error) {
+      console.error("Erro no login:", error);
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
+  },
 };

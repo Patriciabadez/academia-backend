@@ -1,10 +1,8 @@
-const mysql = require("mysql2");
+const { Pool } = require("pg");
 
-const db = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "16292461",
-  database: "academia"
+const pool = new Pool({
+  connectionString: "psql 'postgresql://neondb_owner:npg_JhiMVmCxE3s4@ep-wandering-snow-acjl8q5m-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'",
+  ssl: { rejectUnauthorized: false }
 });
 
-module.exports = db;
+module.exports = pool;
