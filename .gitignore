@@ -1,1 +1,5 @@
+# Arquivos de ambiente com dados sensíveis
+.env
+
+# Diretório de dependências de módulos do Node.js
 node_modules/
